@@ -1,6 +1,10 @@
 #ignore dirs
 
 /target/*
+/gen/*
 
 
 #ignore files
+.settings/*
+.project
+.classpath
