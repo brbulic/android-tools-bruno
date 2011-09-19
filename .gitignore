@@ -1,0 +1,6 @@
+#ignore dirs
+
+/target/*
+
+
+#ignore files
