@@ -3,12 +3,17 @@ package hr.brbulic.android_tools;
 import hr.brbulic.concurrency.BackgroundWorker;
 import hr.brbulic.concurrency.interfaces.IBackgroundDelegate;
 import android.app.Activity;
+import android.app.Application;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 public class HelloAndroidActivity extends Activity implements
 		IBackgroundDelegate {
 
+	
+	
+	private TextView _myTextview;
 	private static String TAG = "android-tools";
 
 	/**
@@ -25,20 +30,28 @@ public class HelloAndroidActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		Log.i(TAG, "onCreate");
 		setContentView(R.layout.main);
-
-		BackgroundWorker.getInstance().start();
+		
+		_myTextview = (TextView)this.findViewById(R.id.mainTextview);
+		
+		
 		BackgroundWorker.getInstance().EnqueueSimple(this);
-		BackgroundWorker.getInstance().EnqueueSimple(new MyHandler());
+		BackgroundWorker.getInstance().EnqueueRunnable(new MyHandler());
+		
 	}
 
-	private class MyHandler implements IBackgroundDelegate {
+	private class MyHandler implements Runnable {
 
 		@Override
-		public void backgroundRequest(Object internalState) {
+		public void run() {
 			int count = 5;
+			
+			StringBuilder mainString = new StringBuilder();
+			
 			while (count < 10) {
 				String string = String.format("Ovo je prekršilo sve... %1$d",
 						count);
+				
+				mainString.append(string);
 
 				Log.i(TAG, string);
 				try {
@@ -48,6 +61,17 @@ public class HelloAndroidActivity extends Activity implements
 
 				count++;
 			}
+			
+			final String resultString = mainString.toString();
+			
+			_myTextview.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					_myTextview.setText(resultString);
+					
+				}
+			});
 		}
 
 	}

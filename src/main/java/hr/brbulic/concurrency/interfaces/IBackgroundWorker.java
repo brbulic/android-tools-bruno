@@ -22,6 +22,12 @@ public interface IBackgroundWorker {
 	 * @param delegate
 	 */
 	public void EnqueueSimple(IBackgroundDelegate delegate);
+	
+	
+	/**
+	 * Enqueue a Runnable interface implementation to run on this thread.
+	 */
+	public void EnqueueRunnable(Runnable runnable);
 
 	/**
 	 * Starts a worker (defaults?)

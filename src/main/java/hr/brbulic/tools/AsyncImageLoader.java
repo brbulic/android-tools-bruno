@@ -15,9 +15,7 @@ public class AsyncImageLoader {
 	{
 		private final String _uriSource;
 		private final ImageView _imageView;
-		
-		
-		
+			
 		public CompositeObject(String _uriSource, ImageView _imageView) {
 			super();
 			this._uriSource = _uriSource;

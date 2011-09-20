@@ -21,6 +21,7 @@ public class BackgroundWorker implements IBackgroundWorker, Runnable {
 	public static IBackgroundWorker getInstance() {
 		if (_instance == null) {
 			_instance = new BackgroundWorker();
+			_instance.start();
 		}
 
 		return _instance;
@@ -50,7 +51,6 @@ public class BackgroundWorker implements IBackgroundWorker, Runnable {
 	@Override
 	public void EnqueueSimple(IBackgroundDelegate delegate) {
 		EnqueueSimple(delegate, null);
-
 	}
 
 	private static class BackgroundWorkerInternalComposite {
@@ -137,6 +137,24 @@ public class BackgroundWorker implements IBackgroundWorker, Runnable {
 
 		Log.i(TAG, "Background worker operation complete!");
 
+	}
+
+	@Override
+	public void EnqueueRunnable(Runnable runnable) {
+		final Runnable dumb = runnable;
+		
+		synchronized (_queueLockObject) {
+			final BackgroundWorkerInternalComposite task = new BackgroundWorkerInternalComposite(new IBackgroundDelegate() {
+				
+				@Override
+				public void backgroundRequest(Object internalState) {
+					dumb.run();				
+				}
+			}, null);
+			
+			_actionQueue.add(task);
+			_queueLockObject.notify();
+		}
 	}
 
 }
