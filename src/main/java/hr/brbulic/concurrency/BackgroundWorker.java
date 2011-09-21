@@ -123,7 +123,8 @@ public class BackgroundWorker implements IBackgroundWorker, Runnable {
 			}
 
 			while (localQueue.size() > 0) {
-				final BackgroundWorkerInternalComposite actionData = localQueue.remove();
+				final BackgroundWorkerInternalComposite actionData = localQueue
+						.remove();
 
 				// OK so this is the real operation... for a queue :)
 				actionData.getDelegate().backgroundRequest(
@@ -142,16 +143,17 @@ public class BackgroundWorker implements IBackgroundWorker, Runnable {
 	@Override
 	public void EnqueueRunnable(Runnable runnable) {
 		final Runnable dumb = runnable;
-		
+
 		synchronized (_queueLockObject) {
-			final BackgroundWorkerInternalComposite task = new BackgroundWorkerInternalComposite(new IBackgroundDelegate() {
-				
-				@Override
-				public void backgroundRequest(Object internalState) {
-					dumb.run();				
-				}
-			}, null);
-			
+			final BackgroundWorkerInternalComposite task = new BackgroundWorkerInternalComposite(
+					new IBackgroundDelegate() {
+
+						@Override
+						public void backgroundRequest(Object internalState) {
+							dumb.run();
+						}
+					}, null);
+
 			_actionQueue.add(task);
 			_queueLockObject.notify();
 		}

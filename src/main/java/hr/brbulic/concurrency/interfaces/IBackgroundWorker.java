@@ -14,8 +14,7 @@ public interface IBackgroundWorker {
 	 * @param delegate
 	 * @param userState
 	 */
-	public void EnqueueSimple(IBackgroundDelegate delegate, Object userState);
-
+	public <E> void EnqueueSimple(IBackgroundDelegate delegate, E userState);
 	/**
 	 * Just enqueues an action
 	 * 
