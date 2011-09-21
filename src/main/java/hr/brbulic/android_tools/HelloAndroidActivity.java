@@ -45,7 +45,7 @@ public class HelloAndroidActivity extends Activity implements
 			StringBuilder mainString = new StringBuilder();
 
 			while (count < 10) {
-				String string = String.format("Ovo je prekršilo sve... %1$d",
+				String string = String.format("Ovo je prekrÅ¡ilo sve... %1$d",
 						count);
 
 				mainString.append(string);

@@ -8,3 +8,7 @@
 .settings/*
 .project
 .classpath
+
+android-tools.iml
+android-tools.ipr
+android-tools.iws
