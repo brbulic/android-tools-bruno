@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+    <TextView 
+    	android:id="@+id/GeneralOptionTextView1" 
+    	android:text="TextView" 
+    	android:textAppearance="?android:attr/textAppearanceLarge" 
+    	android:layout_height="wrap_content" 
+    	android:layout_width="match_parent">
+    </TextView>
+    <CheckBox android:text="Select an option 1" android:id="@+id/Option1" android:layout_height="wrap_content" android:layout_width="match_parent"></CheckBox>
+    <CheckBox android:text="Select an option 2" android:id="@+id/Option2" android:layout_height="wrap_content" android:layout_width="match_parent"></CheckBox>
+    <CheckBox android:text="Select an option 3" android:id="@+id/Option3" android:layout_height="wrap_content" android:layout_width="match_parent"></CheckBox>
+    <CheckBox android:text="Select an option 4" android:id="@+id/Option4" android:layout_height="wrap_content" android:layout_width="match_parent"></CheckBox>
+    
+</LinearLayout>
