@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello android-tools!</string>
     <string name="app_name">android-tools</string>
+    <string name="MainActivity_LoadProperties">Load settings</string>
 </resources>
