@@ -11,5 +11,11 @@ import android.os.Parcelable;
  */
 public interface IActivityEnumBehaviour {
 
+    /**
+     *
+     * @param userObjectData
+     * @return
+     * @throws ClassNotFoundException
+     */
     public IActivityIntentData getIntentDataFrom(Parcelable userObjectData) throws ClassNotFoundException;
 }
