@@ -2,6 +2,8 @@
 
 /target/*
 /gen/*
+/classes/*
+.DS_Store
 
 
 #ignore files

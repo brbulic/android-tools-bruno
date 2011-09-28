@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="hr.brbulic.android_tools" android:versionCode="1" android:versionName="0.0.1-SNAPSHOT">
 
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <application>
     </application>
 
