@@ -13,5 +13,7 @@ import java.io.InputStream;
  */
 public interface IWebRequest {
 
-    InputStream getRequestStream(String url, HttpRequestType requestType);
+    InputStream getRequestStream(String url);
+
+    InputStream getResultWritableStream(String url, byte [] writableData);
 }
