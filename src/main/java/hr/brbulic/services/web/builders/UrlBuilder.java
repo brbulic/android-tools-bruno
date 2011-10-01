@@ -25,11 +25,16 @@ public final class UrlBuilder {
 
     private Boolean _hasBeenBuilt;
 
+    /**
+     * Add a parameter to the string builder.
+     * @param key HTTP GET parameter name
+     * @param value HTTP GET parameter value
+     * @return UrlBuilder to continue appending :)
+     */
     public UrlBuilder addParameter(String key, String value) {
 
         if (_hasBeenBuilt)
             throw new AndroidRuntimeException("Parameters have already been built!");
-
 
         urlMaps.put(key, value);
         return this;
@@ -48,6 +53,4 @@ public final class UrlBuilder {
     public static UrlBuilder createParameterFactory() {
         return new UrlBuilder();
     }
-
-
 }

@@ -1,7 +1,6 @@
 package hr.brbulic.tools;
 
 import hr.brbulic.asserts.AssertUtils;
-import org.apache.commons.logging.Log;
 
 import java.io.*;
 
@@ -22,8 +21,8 @@ public class StreamUtils {
 
         StringBuilder builder = new StringBuilder();
         BufferedInputStream bufferedInputStream = new BufferedInputStream(stream);
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(bufferedInputStream));
+        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
+        BufferedReader reader = new BufferedReader(inputStreamReader);
 
         try {
             String string = reader.readLine();
@@ -32,9 +31,16 @@ public class StreamUtils {
                 builder.append(string);
                 string = reader.readLine();
             }
+
+            stream.close();
+            inputStreamReader.close();
+            reader.close();
         } catch (IOException e) {
             //TODO : MUST PUT THIS TO STRINGS.XML!
             android.util.Log.e(READ_FROM_STRING_TAG, "Cannot read from string");
+        }
+        finally {
+
         }
         return builder.toString();
     }

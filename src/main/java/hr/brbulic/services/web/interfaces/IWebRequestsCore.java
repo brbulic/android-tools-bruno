@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public interface IWebRequestsCore {
 
-    IWebResultEventArgs beginRequestGet(String url, HashMap<String,String> params,  Object userData);
+    IWebResultEventArgs beginRequestGet(String url, HashMap<String, String> params, Object userData);
 
-    IWebResultEventArgs beginRequestPost(String url, HashMap<String,String> params, Object userData);
+    IWebResultEventArgs beginRequestPost(String url, HashMap<String, String> params, Object userData);
 }

@@ -9,8 +9,9 @@ import java.util.Map;
  * User: Bruno
  * Date: 29.09.11.
  * Time: 11:11
- * To change this template use File | Settings | File Templates.
- */
+ *
+ * Standard WebHelpers class with static methods used to do basic HTTP request stuff. You'll see.
+ * */
 public class WebHelpers {
 
     private static final String HTTP_GET_PARAM_START = "?";

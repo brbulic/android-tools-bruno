@@ -6,15 +6,7 @@ import hr.brbulic.services.web.interfaces.IHttpWebResponse;
 import hr.brbulic.services.web.interfaces.IWebRequestsCore;
 import hr.brbulic.services.web.interfaces.IWebResultEventArgs;
 import hr.brbulic.tools.StreamUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedInputStream;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -32,7 +24,7 @@ public class WebRequestActions implements IWebRequestsCore {
 
 
     @Override
-    public IWebResultEventArgs beginRequestGet(String url, HashMap<String, String> params, Object userData) {
+    public IWebResultEventArgs beginRequestGet(String url, HashMap<String, String> params, Object userData)  {
 
         AssertUtils.notNull(url, "Cannot start Request with no URL");
 

@@ -1,11 +1,8 @@
 package hr.brbulic.services.web;
 
-import android.R;
 import android.util.Log;
 import hr.brbulic.services.web.interfaces.IHttpWebResponse;
 import hr.brbulic.services.web.interfaces.IWebRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.logging.StreamHandler;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,12 +35,11 @@ public class WebRequestBasicImpl implements IWebRequest {
         return instance;
     }
 
-
     @Override
     public IHttpWebResponse getRequestStream(final String url) {
 
         InputStream stream;
-        HttpStatus status;
+        int response;
 
         try {
             URL finalUrl = new URL(url);
@@ -58,22 +53,24 @@ public class WebRequestBasicImpl implements IWebRequest {
             httpConn.setInstanceFollowRedirects(true);
             httpConn.setRequestMethod("GET");
             httpConn.connect();
-            int response = httpConn.getResponseCode();
+            response = httpConn.getResponseCode();
             if (response == HttpURLConnection.HTTP_OK) {
                 stream = httpConn.getInputStream();
             } else
                 stream = null;
 
-
         } catch (MalformedURLException e) {
             stream = null;
-            Log.e(TAG, "Malformed Exception!");
+            Log.e(TAG, String.format("Malformed Exception for URL: %1$s", url));
+            response = 500;
+
         } catch (IOException e) {
             stream = null;
             Log.e(TAG, e.getLocalizedMessage());
+            response = 500;
         }
 
-        return new WebResponseImpl(stream, HttpStatus.SC_OK);
+        return new WebResponseImpl(stream, response);
     }
 
 

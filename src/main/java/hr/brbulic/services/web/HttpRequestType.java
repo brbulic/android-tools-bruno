@@ -5,7 +5,8 @@ package hr.brbulic.services.web;
  * User: brbulic
  * Date: 9/29/11
  * Time: 12:24 AM
- * To change this template use File | Settings | File Templates.
+ *
+ * Http Request type enum, use GET or SET. Default uses GET
  */
 public enum HttpRequestType {
 
