@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="@id+/InvalidUrlString">Invalid URL string!</string>
+    <string name="@id+/CannotReceiveString">Cannot get response string!</string>
+    <string name="@id+/CannotOpenInputStream">Cannot open InputStream from WebRequest!</string>
 
 </resources>

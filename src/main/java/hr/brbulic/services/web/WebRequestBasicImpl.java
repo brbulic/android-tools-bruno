@@ -1,10 +1,18 @@
 package hr.brbulic.services.web;
 
+import android.R;
 import android.util.Log;
+import hr.brbulic.services.web.interfaces.IHttpWebResponse;
 import hr.brbulic.services.web.interfaces.IWebRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.StreamHandler;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,23 +40,50 @@ public class WebRequestBasicImpl implements IWebRequest {
 
 
     @Override
-    public InputStream getRequestStream(String url) {
+    public IHttpWebResponse getRequestStream(final String url) {
 
         InputStream stream;
+        HttpStatus status;
+
         try {
             URL updateURL = new URL(url);
             URLConnection conn = updateURL.openConnection();
             stream = conn.getInputStream();
 
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             stream = null;
+            Log.e(TAG, "");
+        } catch (IOException e) {
+            stream = null;
+            Log.e(TAG, "Cannot get response stream!");
         }
 
-        return stream;
+        return new WebResponseImpl(stream, HttpStatus.SC_OK);
     }
 
+
+    private static class WebResponseImpl implements IHttpWebResponse {
+        private final InputStream stream;
+        private final int status;
+
+        private WebResponseImpl(InputStream stream, int status) {
+            this.stream = stream;
+            this.status = status;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return stream;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+    }
+
+
     @Override
-    public InputStream getResultWritableStream(String url, byte[] writableData) {
+    public IHttpWebResponse getResultWritableStream(String url, byte[] writableData) {
         return null;
     }
 }
