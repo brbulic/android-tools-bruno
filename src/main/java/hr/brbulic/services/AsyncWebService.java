@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Date: 01.10.11.
  * Time: 17:10
  * <p/>
- * TODO: Write some class comments on this one :)
+ * This class is the reference implementation of the IWebService that hanldles Asynchronous requests.
  */
 public class AsyncWebService implements IWebService {
 
@@ -30,8 +30,6 @@ public class AsyncWebService implements IWebService {
 
     private final List<IWebServiceRequestData> runningServices = new ArrayList<IWebServiceRequestData>();
 
-    private Thread thread = new Thread(new WebExecutor());
-
     private final Object objectLock = new Object();
 
     private final IHttpRequestInitiators coreProcessor;
@@ -44,6 +42,7 @@ public class AsyncWebService implements IWebService {
     private AsyncWebService(IHttpRequestInitiators coreProcessor) {
         this.coreProcessor = coreProcessor;
         isRunning = true;
+        Thread thread = new Thread(new WebExecutor());
         thread.start();
     }
 
@@ -125,7 +124,9 @@ public class AsyncWebService implements IWebService {
 
                 while (requestDataQueue_internal.size() != 0 || pendingFinalized.size() != 0) {
 
-                    for (int i = 0; i < requestDataQueue_internal.size() || i < MAX_CONCURRENT_REQUEST; i++) {
+                    final int currentSize = requestDataQueue_internal.size();
+
+                    for (int i = 0; (i < currentSize) && (i < MAX_CONCURRENT_REQUEST); i++) {
                         final IWebServiceRequestData requestData = requestDataQueue_internal.remove();
 
                         switch (requestData.getRequestType()) {
@@ -136,7 +137,11 @@ public class AsyncWebService implements IWebService {
                                     @Override
                                     public void run() {
                                         IWebResultEventArgs result = coreProcessor.beginRequestGet(requestData.getUri(), requestData.getParameters(), requestData);
-                                        pendingFinalized.add(result);
+                                        synchronized (objectLock) {
+                                            pendingFinalized.add(result);
+                                            objectLock.notify();
+                                        }
+
                                     }
                                 });
                                 break;
@@ -145,7 +150,7 @@ public class AsyncWebService implements IWebService {
                         }
                     }
 
-                    for (int i = 0; i < pendingFinalized.size() || i < MAX_CONCURRENT_REQUEST; i++) {
+                    for (int i = 0; (i < pendingFinalized.size()) && (i < MAX_CONCURRENT_REQUEST); i++) {
                         final IWebResultEventArgs resultEventArgs = pendingFinalized.remove();
 
                         final IWebServiceRequestData requestData = (IWebServiceRequestData) resultEventArgs.getUserState();

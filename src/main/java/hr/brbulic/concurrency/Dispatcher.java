@@ -1,6 +1,5 @@
 package hr.brbulic.concurrency;
 
-import android.os.Handler;
 import hr.brbulic.concurrency.interfaces.ParametrizedRunnable;
 
 import java.util.concurrent.*;
@@ -19,8 +18,6 @@ public class Dispatcher {
 
     private static final int MAXIMUM_THREADS_IN_POOL = 5;
 
-    private static final Handler _privateHandler = new Handler();
-
     private static final ThreadFactory _myThreadFactory = new ThreadFactory() {
 
         final AtomicInteger _atomicInteger = new AtomicInteger(1);
@@ -30,11 +27,6 @@ public class Dispatcher {
             return new Thread(runnable, "WorkerThread_" + _atomicInteger.getAndIncrement());
         }
     };
-
-
-    public static void BeginInvoke(Runnable action) {
-        _privateHandler.postAtFrontOfQueue(action);
-    }
 
 
     private static final ExecutorService _executorService = Executors.newCachedThreadPool(_myThreadFactory);
@@ -52,7 +44,7 @@ public class Dispatcher {
 
     public static void ParametrizedRunnable(final ParametrizedRunnable action, final Object parameter) {
 
-        BeginInvoke(new Runnable() {
+        BeginThreadPoolInvoke(new Runnable() {
             @Override
             public void run() {
                 action.runWithParam(parameter);
