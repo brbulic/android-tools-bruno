@@ -7,7 +7,8 @@ import java.util.UUID;
  * User: brbulic
  * Date: 9/29/11
  * Time: 12:29 AM
- * To change this template use File | Settings | File Templates.
+ *
+ * Implement this interface to receive HTTP requestData.
  */
 public interface IWebResultDelegate {
 

@@ -3,8 +3,7 @@ package hr.brbulic.concurrency;
 import android.os.Handler;
 import hr.brbulic.concurrency.interfaces.ParametrizedRunnable;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -12,7 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * User: bbulic
  * Date: 24.09.11.
  * Time: 21:11
- * To change this template use File | Settings | File Templates.
+ * <p/>
+ * TODO: Write some class comments on this one :)
  */
 public class Dispatcher {
 
@@ -33,11 +33,22 @@ public class Dispatcher {
 
 
     public static void BeginInvoke(Runnable action) {
-        _privateHandler.post(action);
+        _privateHandler.postAtFrontOfQueue(action);
     }
 
 
-    private static ExecutorService _executorService;
+    private static final ExecutorService _executorService = Executors.newCachedThreadPool(_myThreadFactory);
+
+
+    public static <E> Future<E> BeginInvokeParametrized(Callable<E> myCallbale) {
+
+        return _executorService.submit(myCallbale);
+    }
+
+    public static void BeginThreadPoolInvoke(Runnable runnableOperation) {
+        _executorService.submit(runnableOperation);
+    }
+
 
     public static void ParametrizedRunnable(final ParametrizedRunnable action, final Object parameter) {
 

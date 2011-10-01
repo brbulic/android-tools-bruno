@@ -2,29 +2,30 @@ package hr.brbulic.services.web;
 
 import android.util.Log;
 import hr.brbulic.asserts.AssertUtils;
+import hr.brbulic.services.web.interfaces.IHttpRequestInitiators;
 import hr.brbulic.services.web.interfaces.IHttpWebResponse;
-import hr.brbulic.services.web.interfaces.IWebRequestsCore;
 import hr.brbulic.services.web.interfaces.IWebResultEventArgs;
 import hr.brbulic.tools.StreamUtils;
 
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
  * User: brbulic
  * Date: 9/29/11
  * Time: 12:37 AM
- * To change this template use File | Settings | File Templates.
+ *
+ * TODO: Write some class comments on this one :)
  */
-public class WebRequestActions implements IWebRequestsCore {
+public class WebRequestActions implements IHttpRequestInitiators {
 
     private final String TAG_GET = "WebRequestActionGet";
     private final String TAG_POST = "WebRequestActionPost";
 
 
     @Override
-    public IWebResultEventArgs beginRequestGet(String url, HashMap<String, String> params, Object userData)  {
+    public IWebResultEventArgs beginRequestGet(String url, Map<String, String> params, Object userData) {
 
         AssertUtils.notNull(url, "Cannot start Request with no URL");
 
@@ -46,13 +47,14 @@ public class WebRequestActions implements IWebRequestsCore {
             final String result = StreamUtils.readStringFromStream(response.getInputStream());
             iWebResultEventArgs = new WebResultMessengerWithBuilder(result, null, userData);
         } else {
+            Log.d(TAG_GET, "Cannot get request stream. Check weather you have added INTERNET permissions to the app!");
             iWebResultEventArgs = new WebResultMessengerWithBuilder("", new Exception("Stream is null"), userData);
         }
         return iWebResultEventArgs;
     }
 
     @Override
-    public IWebResultEventArgs beginRequestPost(String url, HashMap<String, String> params, Object userData) {
+    public IWebResultEventArgs beginRequestPost(String url, Map<String, String> params, Object userData) {
 
         return null;
         /*
@@ -62,8 +64,7 @@ public class WebRequestActions implements IWebRequestsCore {
 
     }
 
-
-    private class WebResultMessengerWithBuilder implements IWebResultEventArgs {
+    public static class WebResultMessengerWithBuilder implements IWebResultEventArgs {
 
 
         private final String resultString;

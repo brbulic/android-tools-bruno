@@ -39,9 +39,7 @@ public class StreamUtils {
             //TODO : MUST PUT THIS TO STRINGS.XML!
             android.util.Log.e(READ_FROM_STRING_TAG, "Cannot read from string");
         }
-        finally {
 
-        }
         return builder.toString();
     }
 

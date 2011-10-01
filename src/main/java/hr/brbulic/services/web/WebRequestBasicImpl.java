@@ -2,7 +2,7 @@ package hr.brbulic.services.web;
 
 import android.util.Log;
 import hr.brbulic.services.web.interfaces.IHttpWebResponse;
-import hr.brbulic.services.web.interfaces.IWebRequest;
+import hr.brbulic.services.web.interfaces.IHttpRequestBase;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,17 +18,17 @@ import java.net.URLConnection;
  * Time: 1:25 AM
  * To change this template use File | Settings | File Templates.
  */
-public class WebRequestBasicImpl implements IWebRequest {
+public class WebRequestBasicImpl implements IHttpRequestBase {
 
     private final static String TAG = "WebRequestBasicImpl";
 
     private WebRequestBasicImpl() {
-        Log.i(TAG, "Created new instance of IWebRequest implementation");
+        Log.i(TAG, "Created new instance of IHttpRequestBase implementation");
     }
 
-    private transient static IWebRequest instance;
+    private transient static IHttpRequestBase instance;
 
-    public static IWebRequest getInstance() {
+    public static IHttpRequestBase getInstance() {
         if (instance == null)
             instance = new WebRequestBasicImpl();
 

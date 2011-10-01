@@ -11,7 +11,8 @@ import java.util.Map;
  * User: Bruno
  * Date: 29.09.11.
  * Time: 12:27
- * To change this template use File | Settings | File Templates.
+ *
+ * TODO: Write some class comments on this one :)
  */
 public final class UrlBuilder {
 

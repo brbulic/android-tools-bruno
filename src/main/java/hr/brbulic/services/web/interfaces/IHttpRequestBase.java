@@ -9,9 +9,10 @@ import java.io.InputStream;
  * User: Bruno
  * Date: 29.09.11.
  * Time: 13:38
- * To change this template use File | Settings | File Templates.
+ *
+ * TODO: Write some class comments on this one :)
  */
-public interface IWebRequest {
+public interface IHttpRequestBase {
 
     IHttpWebResponse getRequestStream(final String url);
 

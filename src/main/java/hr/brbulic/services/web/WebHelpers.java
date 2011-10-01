@@ -31,7 +31,6 @@ public class WebHelpers {
         AssertUtils.notNull(parameters, "Cannot create parameters from empty parameters class");
         AssertUtils.IsValueValid(parameters.size() != 0, "Cannot create parameters from no parameters");
 
-
         return getHttpGetParamsFromHashMap(parameters, true);
     }
 

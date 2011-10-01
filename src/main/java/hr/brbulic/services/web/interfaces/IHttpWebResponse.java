@@ -9,7 +9,8 @@ import java.io.InputStream;
  * User: brbulic
  * Date: 10/1/11
  * Time: 2:49 PM
- * To change this template use File | Settings | File Templates.
+ *
+ * TODO: Write some class comments on this one :)
  */
 public interface IHttpWebResponse {
 
