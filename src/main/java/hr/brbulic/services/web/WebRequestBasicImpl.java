@@ -9,6 +9,7 @@ import org.apache.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -46,16 +47,30 @@ public class WebRequestBasicImpl implements IWebRequest {
         HttpStatus status;
 
         try {
-            URL updateURL = new URL(url);
-            URLConnection conn = updateURL.openConnection();
-            stream = conn.getInputStream();
+            URL finalUrl = new URL(url);
+            URLConnection conn = finalUrl.openConnection();
+            if (!(conn instanceof HttpURLConnection)) {
+                return new WebResponseImpl(null, 500);
+            }
+
+            HttpURLConnection httpConn = (HttpURLConnection) conn;
+            httpConn.setAllowUserInteraction(false);
+            httpConn.setInstanceFollowRedirects(true);
+            httpConn.setRequestMethod("GET");
+            httpConn.connect();
+            int response = httpConn.getResponseCode();
+            if (response == HttpURLConnection.HTTP_OK) {
+                stream = httpConn.getInputStream();
+            } else
+                stream = null;
+
 
         } catch (MalformedURLException e) {
             stream = null;
-            Log.e(TAG, "");
+            Log.e(TAG, "Malformed Exception!");
         } catch (IOException e) {
             stream = null;
-            Log.e(TAG, "Cannot get response stream!");
+            Log.e(TAG, e.getLocalizedMessage());
         }
 
         return new WebResponseImpl(stream, HttpStatus.SC_OK);
