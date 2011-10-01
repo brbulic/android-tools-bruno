@@ -36,12 +36,12 @@ public final class AssertUtils {
 
     }
 
-    public static void IsValueValid(Boolean predicateResult, String reason) {
-        if (predicateResult)
+    public static void IsValueValid(Boolean predicateThatMustBeTrue, String reason) {
+        if (!predicateThatMustBeTrue)
             throw ValueOutOfRangeException.encapsulateBase(fabricateThrowableFromReason(OUT_OF_RANGE_MESSAGE, reason));
     }
 
-    public static void IsValueValid(Boolean predicateResult) {
-        IsValueValid(predicateResult, null);
+    public static void IsValueValid(Boolean aBoolean) {
+        IsValueValid(!aBoolean, null);
     }
 }

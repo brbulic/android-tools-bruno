@@ -9,9 +9,9 @@ import java.util.Map;
  * User: Bruno
  * Date: 29.09.11.
  * Time: 11:11
- *
+ * <p/>
  * Standard WebHelpers class with static methods used to do basic HTTP request stuff. You'll see.
- * */
+ */
 public class WebHelpers {
 
     private static final String HTTP_GET_PARAM_START = "?";
@@ -26,7 +26,7 @@ public class WebHelpers {
      * @param parameters HTTP GET/POST parameters
      * @return Formatted parameters
      */
-    public static String getHttpGetParamsFromHashMap(Map<String, String> parameters) {
+    public static String getHttpGetParamsFromMap(Map<String, String> parameters) {
 
         AssertUtils.notNull(parameters, "Cannot create parameters from empty parameters class");
         AssertUtils.IsValueValid(parameters.size() != 0, "Cannot create parameters from no parameters");
@@ -34,8 +34,6 @@ public class WebHelpers {
         return getHttpGetParamsFromHashMap(parameters, true);
     }
 
-
-    private static final StringBuilder mLocalBuilder = new StringBuilder();
 
     /**
      * This method will parse a map of parameters in convert it to HTTP GET compatible string.
@@ -45,13 +43,12 @@ public class WebHelpers {
      *                     to add "ts=NUMBER" to the end of the request
      * @return Formatted string
      */
-    public static synchronized String getHttpGetParamsFromHashMap(Map<String, String> parameters, Boolean useTimeStamp) {
+    public static String getHttpGetParamsFromHashMap(Map<String, String> parameters, Boolean useTimeStamp) {
 
         AssertUtils.notNull(parameters, "Cannot create parameters from empty parameters class");
         AssertUtils.IsValueValid(parameters.size() != 0, "Cannot create parameters from no parameters");
 
-
-        mLocalBuilder.delete(0, mLocalBuilder.length());
+        final StringBuilder mLocalBuilder = new StringBuilder();
 
         mLocalBuilder.append(HTTP_GET_PARAM_START);
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * User: brbulic
  * Date: 9/29/11
  * Time: 12:37 AM
- *
+ * <p/>
  * TODO: Write some class comments on this one :)
  */
 public class WebRequestActions implements IHttpRequestInitiators {
@@ -30,16 +30,20 @@ public class WebRequestActions implements IHttpRequestInitiators {
         AssertUtils.notNull(url, "Cannot start Request with no URL");
 
         IWebResultEventArgs iWebResultEventArgs = null;
-        Log.d(TAG_GET, String.format("Calling for request %1$s", url));
+
 
         String urlSynthetic;
 
-        if (params != null && params.size() > 0)
-            urlSynthetic = String.format(Locale.US, "%1$s%2$s", url, WebHelpers.getHttpGetParamsFromHashMap(params));
-        else
+
+        if (params != null && params.size() > 0) {
+            final String getParams = WebHelpers.getHttpGetParamsFromMap(params);
+
+            urlSynthetic = String.format(Locale.US, "%1$s%2$s", url, getParams);
+        } else
             urlSynthetic = url;
 
         final String urlFinal = urlSynthetic;
+        Log.d(TAG_GET, String.format("Calling for request %1$s", urlFinal));
 
         final IHttpWebResponse response = WebRequestBasicImpl.getInstance().getRequestStream(urlFinal);
 
