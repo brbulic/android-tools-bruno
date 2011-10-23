@@ -9,7 +9,7 @@ import android.util.AndroidRuntimeException;
  * Time: 11:33
  * Base class for Runtime assertion Exceptions. Inherits from {@link <AndroidRuntimeException>}, the unchecked exception in runtime.
  */
-public class AssertException extends AndroidRuntimeException {
+public class AssertException extends RuntimeException {
 
     private String reason = null;
 

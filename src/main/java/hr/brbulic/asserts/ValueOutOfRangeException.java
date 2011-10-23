@@ -10,7 +10,13 @@ package hr.brbulic.asserts;
  */
 public class ValueOutOfRangeException extends AssertException {
 
-    public ValueOutOfRangeException(String message) {
+    /**
+	 * Some version UUID
+	 */
+	private static final long serialVersionUID = 8713437578384105015L;
+
+
+	public ValueOutOfRangeException(String message) {
         super(message);
     }
 
