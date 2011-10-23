@@ -8,7 +8,6 @@ package hr.brbulic.mvc;
  */
 public abstract class ViewModelBase  {
 
-
     public abstract String getTag();
 
     public abstract String getPageTitle();

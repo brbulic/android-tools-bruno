@@ -1,15 +1,17 @@
 package hr.brbulic.services.web;
 
 import android.util.Log;
-import hr.brbulic.services.web.interfaces.IHttpWebResponse;
 import hr.brbulic.services.web.interfaces.IHttpRequestBase;
+import hr.brbulic.services.web.interfaces.IHttpWebResponse;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,28 +43,44 @@ public class WebRequestBasicImpl implements IHttpRequestBase {
         InputStream stream;
         int response;
 
+//        try {
+//            URL finalUrl = new URL(url);
+//            URLConnection conn = finalUrl.openConnection();
+//            if (!(conn instanceof HttpURLConnection)) {
+//                return new WebResponseImpl(null, 500);
+//            }
+//
+//            HttpURLConnection httpConn = (HttpURLConnection) conn;
+//            httpConn.setAllowUserInteraction(false);
+//            httpConn.setInstanceFollowRedirects(true);
+//            httpConn.setRequestMethod("GET");
+//            httpConn.connect();
+//            response = httpConn.getResponseCode();
+//            if (response == HttpURLConnection.HTTP_OK) {
+//                stream = httpConn.getInputStream();
+//            } else
+//                stream = null;
+//
+//        } catch (MalformedURLException e) {
+//            stream = null;
+//            Log.e(TAG, String.format("Malformed Exception for URL: %1$s", url));
+//            response = 500;
+//
+//        } catch (IOException e) {
+//            stream = null;
+//            Log.e(TAG, e.getLocalizedMessage());
+//            response = 500;
+//        }
+
+        HttpClient client = new DefaultHttpClient();
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Content-Type", "UTF-8");
+        HttpResponse httpResponse = null;
         try {
-            URL finalUrl = new URL(url);
-            URLConnection conn = finalUrl.openConnection();
-            if (!(conn instanceof HttpURLConnection)) {
-                return new WebResponseImpl(null, 500);
-            }
-
-            HttpURLConnection httpConn = (HttpURLConnection) conn;
-            httpConn.setAllowUserInteraction(false);
-            httpConn.setInstanceFollowRedirects(true);
-            httpConn.setRequestMethod("GET");
-            httpConn.connect();
-            response = httpConn.getResponseCode();
-            if (response == HttpURLConnection.HTTP_OK) {
-                stream = httpConn.getInputStream();
-            } else
-                stream = null;
-
-        } catch (MalformedURLException e) {
-            stream = null;
-            Log.e(TAG, String.format("Malformed Exception for URL: %1$s", url));
-            response = 500;
+            httpResponse = client.execute(httpGet);
+            final HttpEntity getEntity = new BufferedHttpEntity(httpResponse.getEntity());
+            stream = getEntity.getContent();
+            response = httpResponse.getStatusLine().getStatusCode();
 
         } catch (IOException e) {
             stream = null;
