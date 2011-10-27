@@ -43,8 +43,7 @@ public abstract class MvcActivityBase extends Activity {
         if (null != _baseViewModel)
             setTitle(_baseViewModel.getPageTitle());
 
-
-        onPageCreate();
+        onPageCreate(bundle);
     }
 
     @Override
@@ -69,8 +68,9 @@ public abstract class MvcActivityBase extends Activity {
 
     /**
      * Implement this method to execute code on Activity Create
+     * @param bundle
      */
-    protected abstract void onPageCreate();
+    protected abstract void onPageCreate(Bundle bundle);
 
     /**
      * Implement this method to execute code on Activity Destroy

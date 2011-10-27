@@ -17,6 +17,8 @@ public interface IWebService {
 
     public UUID initiateRequest(HttpRequestType requestType, String uri, Map<String,String> parameters, Object userData, IWebResultDelegate callback);
 
+    public UUID initiateRequestString(String uri, String writableString, Object userData, IWebResultDelegate callback);
+
     public Boolean isRequestRunning(UUID request);
 
     public Boolean cancelRequest(UUID request);

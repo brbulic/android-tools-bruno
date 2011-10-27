@@ -11,8 +11,6 @@ package hr.brbulic.services.web;
 public enum HttpRequestType {
 
     DEFAULT,
-    REQUEST_TYPE_GET,
-    REQUEST_TYPE_POST,
-
-
+    GET,
+    POST,
 }

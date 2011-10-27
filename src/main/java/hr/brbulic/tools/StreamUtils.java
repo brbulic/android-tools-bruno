@@ -21,7 +21,13 @@ public class StreamUtils {
 
         StringBuilder builder = new StringBuilder();
         BufferedInputStream bufferedInputStream = new BufferedInputStream(stream);
-        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(bufferedInputStream,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            inputStreamReader = new InputStreamReader(bufferedInputStream);
+        }
+
         BufferedReader reader = new BufferedReader(inputStreamReader);
 
         try {

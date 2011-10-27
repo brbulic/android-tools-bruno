@@ -2,8 +2,6 @@ package hr.brbulic.services.web.interfaces;
 
 import hr.brbulic.services.web.HttpRequestType;
 
-import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -18,7 +16,7 @@ public interface IWebServiceRequestData {
 
     public String getUri();
 
-    public Map<String,String> getParameters();
+    public String getParameters();
 
     public Object getUserData();
 

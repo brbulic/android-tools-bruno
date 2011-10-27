@@ -11,7 +11,7 @@ import java.util.Map;
  * User: Bruno
  * Date: 29.09.11.
  * Time: 12:27
- *
+ * <p/>
  * TODO: Write some class comments on this one :)
  */
 public final class UrlBuilder {
@@ -28,7 +28,8 @@ public final class UrlBuilder {
 
     /**
      * Add a parameter to the string builder.
-     * @param key HTTP GET parameter name
+     *
+     * @param key   HTTP GET parameter name
      * @param value HTTP GET parameter value
      * @return UrlBuilder to continue appending :)
      */

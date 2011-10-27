@@ -1,8 +1,6 @@
 package hr.brbulic.services.web.interfaces;
 
-import hr.brbulic.services.web.HttpRequestType;
-
-import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,6 +13,8 @@ import java.io.InputStream;
 public interface IHttpRequestBase {
 
     IHttpWebResponse getRequestStream(final String url);
+
+    IHttpWebResponse getRequestStream(final URI uri);
 
     IHttpWebResponse getResultWritableStream(String url, byte [] writableData);
 }

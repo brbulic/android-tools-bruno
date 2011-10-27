@@ -7,6 +7,8 @@ import hr.brbulic.services.web.interfaces.IHttpWebResponse;
 import hr.brbulic.services.web.interfaces.IWebResultEventArgs;
 import hr.brbulic.tools.StreamUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Locale;
 import java.util.Map;
 
@@ -25,29 +27,52 @@ public class WebRequestActions implements IHttpRequestInitiators {
 
 
     @Override
-    public IWebResultEventArgs beginRequestGet(String url, Map<String, String> params, Object userData) {
+    public IWebResultEventArgs beginRequest(HttpRequestType type, String url, Map<String, String> params, Object userData) {
+
+        AssertUtils.notNull(url, "Cannot begin a request without URL");
+
+        String convertedParams;
+
+        if (params != null && params.size() > 0) {
+            final String getParams = WebHelpers.getHttpGetParamsFromMap(params);
+            convertedParams = getParams;
+        } else
+            convertedParams = WebHelpers.getCurrentTimestamp();
+
+        return beginRequest(type, url, convertedParams, userData);
+    }
+
+    @Override
+    public IWebResultEventArgs beginRequest(HttpRequestType type, String url, String compressedParams, Object userData) {
 
         AssertUtils.notNull(url, "Cannot start Request with no URL");
 
         IWebResultEventArgs iWebResultEventArgs = null;
 
-
-        String urlSynthetic;
-
-
-        if (params != null && params.size() > 0) {
-            final String getParams = WebHelpers.getHttpGetParamsFromMap(params);
-
-            urlSynthetic = String.format(Locale.US, "%1$s%2$s", url, getParams);
-        } else
-            urlSynthetic = url;
-
-        final String urlFinal = urlSynthetic;
+        final String urlFinal = String.format(Locale.US, "$s%1$s%2", url, compressedParams);
+        IHttpWebResponse response;
         Log.d(TAG_GET, String.format("Calling for request %1$s", urlFinal));
 
-        final IHttpWebResponse response = WebRequestBasicImpl.getInstance().getRequestStream(urlFinal);
+        WebRequestBasicRoot root = new WebRequestBasicApacheHttp();
 
-        if (response.getInputStream() != null) {
+
+        switch (type) {
+            case POST:
+                try {
+                    final byte[] byteParams = compressedParams.getBytes("UTF-8");
+                    response = root.getResultWritableStream(url, byteParams);
+                } catch (UnsupportedEncodingException e) {
+                    response = null;
+                }
+                break;
+            case GET:
+            case DEFAULT:
+            default:
+                response = root.getRequestStream(URI.create(urlFinal));
+                break;
+        }
+
+        if (null != response && response.getInputStream() != null) {
             final String result = StreamUtils.readStringFromStream(response.getInputStream());
             iWebResultEventArgs = new WebResultMessengerWithBuilder(result, null, userData);
         } else {
@@ -57,16 +82,6 @@ public class WebRequestActions implements IHttpRequestInitiators {
         return iWebResultEventArgs;
     }
 
-    @Override
-    public IWebResultEventArgs beginRequestPost(String url, Map<String, String> params, Object userData) {
-
-        return null;
-        /*
-       IWebResultEventArgs result = new WebResultMessengerWithBuilder("Izlaz", new IndexOutOfBoundsException(), new Object());
-
-       return result;*/
-
-    }
 
     public static class WebResultMessengerWithBuilder implements IWebResultEventArgs {
 

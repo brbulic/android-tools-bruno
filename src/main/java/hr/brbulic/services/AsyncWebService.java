@@ -1,9 +1,9 @@
 package hr.brbulic.services;
 
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 import hr.brbulic.concurrency.Dispatcher;
 import hr.brbulic.services.web.HttpRequestType;
+import hr.brbulic.services.web.WebHelpers;
 import hr.brbulic.services.web.WebRequestActions;
 import hr.brbulic.services.web.interfaces.*;
 
@@ -20,220 +20,231 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class AsyncWebService implements IWebService {
 
+    private static final String TAG = "AsyncWebService";
 
-	private static final String TAG = "AsyncWebService";
+    private final Queue<IWebServiceRequestData> requestDataQueue = new ConcurrentLinkedQueue<IWebServiceRequestData>();
 
+    private final List<IWebServiceRequestData> cancellableRequests = new ArrayList<IWebServiceRequestData>();
 
-	private final Queue<IWebServiceRequestData> requestDataQueue = new ConcurrentLinkedQueue<IWebServiceRequestData>();
+    private final List<IWebServiceRequestData> runningServices = new ArrayList<IWebServiceRequestData>();
 
-	private final List<IWebServiceRequestData> cancellableRequests = new ArrayList<IWebServiceRequestData>();
+    private final Object objectLock = new Object();
 
-	private final List<IWebServiceRequestData> runningServices = new ArrayList<IWebServiceRequestData>();
+    private final IHttpRequestInitiators coreProcessor;
 
-	private final Object objectLock = new Object();
+    private volatile Boolean isRunning;
 
-	private final IHttpRequestInitiators coreProcessor;
+    private final Thread thread;
 
-	private volatile Boolean isRunning;
 
-	private final Thread thread;
+    private final int MAX_CONCURRENT_REQUESTS = 3;
 
+    private AsyncWebService(IHttpRequestInitiators coreProcessor) {
+        this.coreProcessor = coreProcessor;
+        isRunning = true;
+        thread = new Thread(new WebExecutor());
+        thread.start();
+    }
 
-	private final int MAX_CONCURRENT_REQUESTS = 3;
+    private static IWebService _myInstance;
 
-	private AsyncWebService(IHttpRequestInitiators coreProcessor) {
-		this.coreProcessor = coreProcessor;
-		isRunning = true;
-		thread = new Thread(new WebExecutor());
-		thread.start();
-	}
+    public static IWebService getInstance() {
+        if (_myInstance == null) {
+            _myInstance = new AsyncWebService(new WebRequestActions());
+        }
 
-	private static IWebService _myInstance;
+        return _myInstance;
+    }
 
-	public static IWebService getInstance() {
-		if (_myInstance == null) {
-			_myInstance = new AsyncWebService(new WebRequestActions());
-		}
 
-		return _myInstance;
-	}
+    @Override
+    public UUID initiateRequest(HttpRequestType requestType, String uri, Map<String, String> parameters, Object userData, IWebResultDelegate callback) {
 
+        final UUID uuid = UUID.randomUUID();
 
-	@Override
-	public UUID initiateRequest(HttpRequestType requestType, String uri, Map<String, String> parameters, Object userData, IWebResultDelegate callback) {
+        final String writableString = WebHelpers.getHttpGetParamsFromHashMap(parameters, true);
+        final IWebServiceRequestData data = new WebRequestDataInternal(requestType, uri, writableString, userData, callback, uuid);
 
-		final UUID uuid = UUID.randomUUID();
+        synchronized (objectLock) {
+            requestDataQueue.add(data);
+            objectLock.notify();
+        }
 
-		final IWebServiceRequestData data = new WebRequestDataInternal(requestType, uri, parameters, userData, callback, uuid);
+        return uuid;
+    }
 
-		synchronized (objectLock) {
-			requestDataQueue.add(data);
-			objectLock.notify();
-		}
+    @Override
+    public UUID initiateRequestString(String uri, String writableString, Object userData, IWebResultDelegate callback) {
 
-		return uuid;
-	}
+        final UUID uuid = UUID.randomUUID();
 
-	@Override
-	public Boolean isRequestRunning(UUID request) {
-		return false;
-	}
+        final IWebServiceRequestData data = new WebRequestDataInternal(HttpRequestType.POST, uri, writableString, userData, callback, uuid);
 
-	@Override
-	public Boolean cancelRequest(UUID request) {
-		return false;
-	}
+        synchronized (objectLock) {
+            requestDataQueue.add(data);
+            objectLock.notify();
+        }
 
-	@Override
-	public void StopService() {
-		synchronized (objectLock) {
-			isRunning = Boolean.FALSE;
-			objectLock.notify();
-		}
-	}
+        return uuid;
 
+    }
 
-	private final class WebExecutor implements Runnable {
+    @Override
+    public Boolean isRequestRunning(UUID request) {
+        return false;
+    }
 
-		private final Queue<IWebServiceRequestData> requestDataQueue_internal = new ConcurrentLinkedQueue<IWebServiceRequestData>();
-		private final Queue<IWebResultEventArgs> pendingFinalized = new ConcurrentLinkedQueue<IWebResultEventArgs>();
+    @Override
+    public Boolean cancelRequest(UUID request) {
+        return false;
+    }
 
+    @Override
+    public void StopService() {
+        synchronized (objectLock) {
+            isRunning = Boolean.FALSE;
+            objectLock.notify();
+        }
+    }
 
-		@Override
-		public void run() {
-			Thread.currentThread().setName(String.format("%1$s_%2$s", TAG, this.hashCode()));
 
-			while (isRunning) {
+    private final class WebExecutor implements Runnable {
 
-				synchronized (objectLock) {
+        private final Queue<IWebServiceRequestData> requestDataQueue_internal = new ConcurrentLinkedQueue<IWebServiceRequestData>();
+        private final Queue<IWebResultEventArgs> pendingFinalized = new ConcurrentLinkedQueue<IWebResultEventArgs>();
 
-					if (requestDataQueue.size() == 0 && pendingFinalized.size() == 0 && requestDataQueue_internal.size() == 0) {
-						try {
-							objectLock.wait();
-						} catch (InterruptedException e) {
-							Log.i(TAG, "New requests found... waking up!");
-						}
-					}
 
-					if (!isRunning)
-						break;
+        @Override
+        public void run() {
+            Thread.currentThread().setName(String.format("%1$s_%2$s", TAG, this.hashCode()));
 
+            while (isRunning) {
 
-					while (requestDataQueue.size() != 0)
-						requestDataQueue_internal.add(requestDataQueue.remove());
-				}
+                synchronized (objectLock) {
 
+                    if (requestDataQueue.size() == 0 && pendingFinalized.size() == 0 && requestDataQueue_internal.size() == 0) {
+                        try {
+                            objectLock.wait();
+                        } catch (InterruptedException e) {
+                            Log.i(TAG, "New requests found... waking up!");
+                        }
+                    }
 
-				for (int i = 0; (i < requestDataQueue_internal.size()) && (i < MAX_CONCURRENT_REQUESTS); i++) {
-					final IWebServiceRequestData requestData = requestDataQueue_internal.remove();
+                    if (!isRunning)
+                        break;
 
-					switch (requestData.getRequestType()) {
 
-						case DEFAULT:
-						case REQUEST_TYPE_GET:
-							Dispatcher.BeginThreadPoolInvoke(new Runnable() {
-								@Override
-								public void run() {
-									IWebResultEventArgs result = coreProcessor.beginRequestGet(
-											requestData.getUri(),
-											requestData.getParameters(),
-											requestData);
-									synchronized (objectLock) {
-										pendingFinalized.add(result);
-										objectLock.notify();
-									}
+                    while (requestDataQueue.size() != 0)
+                        requestDataQueue_internal.add(requestDataQueue.remove());
+                }
 
-								}
-							});
-							Thread.yield();
-							break;
-						case REQUEST_TYPE_POST:
-							throw new AndroidRuntimeException("Request type out of range!");
-					}
-				}
 
-				for (int i = 0; (i < pendingFinalized.size()) && (i < MAX_CONCURRENT_REQUESTS); i++) {
+                for (int i = 0; (i < requestDataQueue_internal.size()) && (i < MAX_CONCURRENT_REQUESTS); i++) {
+                    final IWebServiceRequestData requestData = requestDataQueue_internal.remove();
 
-					IWebResultEventArgs resultEventArgs;
+                    Dispatcher.BeginThreadPoolInvoke(new Runnable() {
 
-					synchronized (objectLock) {
-						resultEventArgs = pendingFinalized.remove();
-						objectLock.notify();
-					}
+                        @Override
+                        public void run() {
+                            IWebResultEventArgs result = coreProcessor.beginRequest(
+                                    requestData.getRequestType(),
+                                    requestData.getUri(),
+                                    requestData.getParameters(),
+                                    requestData);
+                            synchronized (objectLock) {
+                                pendingFinalized.add(result);
+                                objectLock.notify();
+                            }
 
-					final IWebServiceRequestData requestData = (IWebServiceRequestData) resultEventArgs.getUserState();
+                        }
+                    });
+                    Thread.yield();
+                    break;
 
-					final IWebResultEventArgs finalResult = new WebRequestActions.WebResultMessengerWithBuilder(resultEventArgs.getResultString(), resultEventArgs.getError(), requestData.getUserData());
+                }
 
-					requestData.getResultDelegate().onWebServiceResult(requestData.getRequestUuid(), finalResult);
+                for (int i = 0; (i < pendingFinalized.size()) && (i < MAX_CONCURRENT_REQUESTS); i++) {
 
-				}
+                    IWebResultEventArgs resultEventArgs;
 
+                    synchronized (objectLock) {
+                        resultEventArgs = pendingFinalized.remove();
+                        objectLock.notify();
+                    }
 
-				Thread.yield();
+                    final IWebServiceRequestData requestData = (IWebServiceRequestData) resultEventArgs.getUserState();
 
+                    final IWebResultEventArgs finalResult = new WebRequestActions.WebResultMessengerWithBuilder(resultEventArgs.getResultString(), resultEventArgs.getError(), requestData.getUserData());
 
-			}
+                    requestData.getResultDelegate().onWebServiceResult(requestData.getRequestUuid(), finalResult);
 
+                }
 
-		}
-	}
 
+                Thread.yield();
 
-	private final class WebRequestDataInternal implements IWebServiceRequestData {
 
-		private final String requestUri;
+            }
 
-		private final Map<String, String> params;
 
-		private final IWebResultDelegate resultDelegate;
+        }
+    }
 
-		private final Object userObject;
 
-		private final UUID uuid;
+    private final class WebRequestDataInternal implements IWebServiceRequestData {
 
-		private final HttpRequestType requestType;
+        private final String requestUri;
 
-		public WebRequestDataInternal(HttpRequestType requestType, String requestUri, Map<String, String> params, Object userObject, IWebResultDelegate resultDelegate, UUID uuid) {
-			this.requestType = requestType;
-			this.requestUri = requestUri;
-			this.params = params;
-			this.userObject = userObject;
-			this.resultDelegate = resultDelegate;
-			this.uuid = uuid;
-		}
+        private final String params;
 
+        private final IWebResultDelegate resultDelegate;
 
-		@Override
-		public String getUri() {
-			return requestUri;
-		}
+        private final Object userObject;
 
-		@Override
-		public Map<String, String> getParameters() {
-			return params;
-		}
+        private final UUID uuid;
 
-		@Override
-		public Object getUserData() {
-			return userObject;
-		}
+        private final HttpRequestType requestType;
 
-		@Override
-		public IWebResultDelegate getResultDelegate() {
-			return resultDelegate;
-		}
+        public WebRequestDataInternal(HttpRequestType requestType, String requestUri, String params, Object userObject, IWebResultDelegate resultDelegate, UUID uuid) {
+            this.requestType = requestType;
+            this.requestUri = requestUri;
+            this.params = params;
+            this.userObject = userObject;
+            this.resultDelegate = resultDelegate;
+            this.uuid = uuid;
+        }
 
-		@Override
-		public UUID getRequestUuid() {
-			return uuid;
-		}
 
-		@Override
-		public HttpRequestType getRequestType() {
-			return requestType;
-		}
-	}
+        @Override
+        public String getUri() {
+            return requestUri;
+        }
+
+        @Override
+        public String getParameters() {
+            return params;
+        }
+
+        @Override
+        public Object getUserData() {
+            return userObject;
+        }
+
+        @Override
+        public IWebResultDelegate getResultDelegate() {
+            return resultDelegate;
+        }
+
+        @Override
+        public UUID getRequestUuid() {
+            return uuid;
+        }
+
+        @Override
+        public HttpRequestType getRequestType() {
+            return requestType;
+        }
+    }
 
 
 }
