@@ -49,26 +49,18 @@ public class WebRequestActions implements IHttpRequestInitiators {
 
         IWebResultEventArgs iWebResultEventArgs = null;
 
-        final String urlFinal = String.format(Locale.US, "$s%1$s%2", url, compressedParams);
-        IHttpWebResponse response;
-        Log.d(TAG_GET, String.format("Calling for request %1$s", urlFinal));
 
+        IHttpWebResponse response;
         WebRequestBasicRoot root = new WebRequestBasicApacheHttp();
 
-
         switch (type) {
-            case POST:
-                try {
-                    final byte[] byteParams = compressedParams.getBytes("UTF-8");
-                    response = root.getResultWritableStream(url, byteParams);
-                } catch (UnsupportedEncodingException e) {
-                    response = null;
-                }
-                break;
-            case GET:
             case DEFAULT:
+            case GET:
+                response = ProcessGetRequest(root, url, compressedParams);
+                break;
+            case POST:
             default:
-                response = root.getRequestStream(URI.create(urlFinal));
+                response = ProcessPostRequest(root, url, compressedParams);
                 break;
         }
 
@@ -80,6 +72,27 @@ public class WebRequestActions implements IHttpRequestInitiators {
             iWebResultEventArgs = new WebResultMessengerWithBuilder("", new Exception("Stream is null"), userData);
         }
         return iWebResultEventArgs;
+    }
+
+    private IHttpWebResponse ProcessPostRequest(WebRequestBasicRoot root, String url, String compressedParams) {
+        IHttpWebResponse response;
+        try {
+            final byte[] byteParams = compressedParams.getBytes("UTF-8");
+            Log.d(TAG_POST, String.format("Calling POST for \"$s%1\"", url));
+            response = root.getResultWritableStream(url, byteParams);
+        } catch (UnsupportedEncodingException e) {
+            response = null;
+        }
+
+        return response;
+    }
+
+    private IHttpWebResponse ProcessGetRequest(WebRequestBasicRoot root, String url, String compressedParams) {
+
+        final String urlFinal = String.format(Locale.US, "$s%1$s%2", url, compressedParams);
+        Log.d(TAG_GET, String.format("Calling for request %1$s", urlFinal));
+        final IHttpWebResponse response = root.getRequestStream(URI.create(urlFinal));
+        return response;
     }
 
 
